@@ -1,5 +1,6 @@
 package com.startuplin.course_planner.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +20,18 @@ public class Course {
     private int unit;
     private String description;
     private List<String> prerequisites;
+
+    @Column(columnDefinition = "text")
+    private String prerequisiteNotes;
+
+    @Column(columnDefinition = "text")
+    private String prerequisiteSource;
+
+    private String prerequisiteSourceType;
+
+    protected Course() {
+        this.prerequisites = new ArrayList<>();
+    }
 
     public Course(String code, String name, int unit, String description) {
         this.code = code;
@@ -70,6 +83,18 @@ public class Course {
 
     public List<String> getPrerequisites() {
         return List.copyOf(prerequisites);
+    }
+
+    public String getPrerequisiteNotes() {
+        return prerequisiteNotes;
+    }
+
+    public String getPrerequisiteSource() {
+        return prerequisiteSource;
+    }
+
+    public String getPrerequisiteSourceType() {
+        return prerequisiteSourceType;
     }
 
     public void setPrerequisites(List<String> prerequisites) {
