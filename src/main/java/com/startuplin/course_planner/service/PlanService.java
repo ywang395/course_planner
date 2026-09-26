@@ -46,6 +46,10 @@ public class PlanService {
         return response(planRepository.save(plan));
     }
 
+    public void delete(Long id) {
+        planRepository.delete(find(id));
+    }
+
     private CoursePlan find(Long id) {
         return planRepository.findById(id).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found: " + id));

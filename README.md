@@ -1,6 +1,6 @@
 # Course Planner
 
-A Spring Boot REST backend for exploring San José State University Computer Science courses, checking prerequisite readiness, and saving semester plans in PostgreSQL.
+A Spring Boot REST backend and React frontend for exploring San José State University Computer Science courses, tracking completed classes, finding the most-referenced prerequisites, checking prerequisite readiness, and saving semester plans in PostgreSQL.
 
 ## Requirements
 
@@ -38,23 +38,28 @@ The project includes the Maven wrapper, so a separate Maven installation is not 
 
 ## Run the frontend
 
-The React course browser lives in `frontend/`. Use Node.js 22.12+ (or Node 20.19+), following the [Vite requirements](https://vite.dev/guide/).
+The React app lives in `frontend/`. Use Node.js 22.12+ (or Node 20.19+), following the [Vite requirements](https://vite.dev/guide/).
 
 Keep Spring Boot running in one terminal. In a second terminal, run:
 
 ```sh
 cd frontend
 npm install
-npm run dev
+npm run dev      # http://localhost:5173
 ```
 
-Open `http://localhost:5173`. The browser loads courses from the API, filters them by code or name, and displays expandable prerequisite notes and sources. Import the course data below if the list is empty.
+Open `http://localhost:5173`. Import the course data below if the list is empty.
+
+### Using the app
+
+- **Mark completed classes:** type a code into **Add a completed class**, or tick **Completed** on any row in the ranking. Prerequisites of a completed class count as completed too, transitively: marking CS 146 also covers CS 46B, CS 46A, MATH 42, MATH 30, and so on. These appear under **Also counted as completed** with the class that covers them, and their ranking rows show **Covered by …** with a locked checkbox; remove the covering class to undo them. Because prerequisite lists include alternatives, every listed alternative is covered, not only the one you took. Off-catalog prerequisites such as `MATH 19` are accepted; keep the space (`CS 46A`, not `CS46A`). Remove a class with the × on its chip, or use **Clear all** (with Undo). The selection is saved in this browser's `localStorage`.
+- **Most-referenced prerequisites:** the ranking panel lists the classes that appear in the most prerequisite lists, from `GET /api/courses/prerequisite-frequency`. The score `remaining/total` shows how many courses you have not completed still list that class, out of all catalog courses that list it. Classes are split into **Major classes**, **GE classes**, and **Elective classes**, and each section lists only its subject names (alphabetically, e.g. CMPE, CS, MATH) with a class count. Click a subject to expand its classes in rank order; click again to collapse it. The section comes from each course's `category` (set by the catalog sync import): GE for courses tagged with a GE Area (for example MATH 30, MATH 31, ENGL 1A), Elective for courses listed only as major electives (for example CS 48, CS 49J), and Major otherwise. The ranking only lists classes that appear in some prerequisite list, so most electives, which are nobody's prerequisite, do not appear. Off-catalog variants follow the catalog course they extend (ENGL 1AF → ENGL 1A, MATH 31X → MATH 31). Use **Hide completed** to focus on what is left. Lists include alternatives, so a high rank means "most referenced", not "required".
 
 `frontend/vite.config.js` forwards development requests from `/api` to `http://localhost:8080`, so the frontend uses relative URLs without requiring backend CORS changes. If the backend port changes, update that proxy target.
 
-To understand the frontend, start with `frontend/src/api.js` (HTTP request), then `frontend/src/App.jsx` (React state, loading, search, and rendering), and `frontend/src/styles.css` (responsive layout).
+To understand the frontend, start with `frontend/src/api.js` (HTTP requests), `frontend/src/App.jsx` (page state and loading), `frontend/src/CompletedPanel.jsx` and `frontend/src/PrerequisiteRanking.jsx` (the two panels), and the pure helpers in `frontend/src/completed.js` and `frontend/src/prerequisiteFrequency.js`.
 
-Run `npm run build` from `frontend/` to generate `frontend/dist/`. For production, serve these static files with a host that also routes `/api` to Spring Boot; the development proxy is not included in the build. Plan editing and eligibility forms are future frontend steps—their backend endpoints already exist.
+Run `npm run build` from `frontend/` to generate `frontend/dist/`. For production, serve these static files with a host that also routes `/api` to Spring Boot; the development proxy is not included in the build.
 
 ## Import course data
 
@@ -64,11 +69,13 @@ After the application has started successfully and created the tables, open anot
 psql -h localhost -U your_postgres_role -d courseplanner -v ON_ERROR_STOP=1 -f src/main/resources/db/sjsu-cs-2026-2027.sql
 psql -h localhost -U your_postgres_role -d courseplanner -v ON_ERROR_STOP=1 -f src/main/resources/db/sjsu-course-prerequisite-notes.sql
 psql -h localhost -U your_postgres_role -d courseplanner -v ON_ERROR_STOP=1 -f src/main/resources/db/sjsu-course-prerequisite-codes.sql
+psql -h localhost -U your_postgres_role -d courseplanner -v ON_ERROR_STOP=1 -f sjsu_cs_2026_2027.sql
+psql -h localhost -U your_postgres_role -d courseplanner -v ON_ERROR_STOP=1 -f src/main/resources/db/sjsu-catalog-2026-27-sync.sql
 ```
 
 If you changed the database host, port, or name, use the matching connection options in these commands. `psql` may prompt for your password.
 
-The seed contains 26 explicitly named courses from the supplied 2026–2027 CS roadmap, including science/math alternatives—not a complete university catalog. Imports are manual, not automatic at startup. See the [database import guide](src/main/resources/db/README.md) for details and the [prerequisite report](docs/sjsu-course-prerequisites.md) for sources and caveats.
+The first three imports load 26 roadmap courses with researched prerequisite notes. The last two load the normalized 2026–2027 catalog dataset (program requirements, GE areas, prerequisite rules, and source evidence in separate tables) and sync it into the app's `course` table, bringing it to 85 courses, including CS electives and previously off-catalog prerequisites such as MATH 19 and CMPE 102. Courses without a published unit count are stored with 0 units. This is still not a complete university catalog. Imports are manual, not automatic at startup. See the [database import guide](src/main/resources/db/README.md) for details and the [prerequisite report](docs/sjsu-course-prerequisites.md) for sources and caveats.
 
 ## API endpoints
 
@@ -78,13 +85,15 @@ The seed contains 26 explicitly named courses from the supplied 2026–2027 CS r
 | GET | `/api/courses?prerequisite=CS%2046B` | Find courses referencing CS 46B |
 | GET | `/api/courses/{code}` | Get a course by code |
 | GET | `/api/courses/{code}/prerequisites` | Get its stored prerequisite codes |
+| GET | `/api/courses/prerequisite-frequency?completed=CS%2046A&completed=MATH%2019` | Rank prerequisite codes by how many catalog courses reference them (`count`), how many of those are not yet completed (`remainingCount`), and which ones (`requiredBy`) |
 | POST | `/api/eligibility/check` | Evaluate preparation for selected courses |
 | POST | `/api/plans` | Create a saved semester plan |
 | GET | `/api/plans` | List saved plans |
 | GET | `/api/plans/{id}` | Retrieve a saved plan |
 | PUT | `/api/plans/{id}` | Replace a plan's semester, unit limit, and courses |
+| DELETE | `/api/plans/{id}` | Delete a saved plan (`204`; `404` if unknown) |
 
-Course routes use a **course code**, while plan routes use a **numeric ID**. Encode spaces in URLs as `%20`: `CS 46B` becomes `CS%2046B`. Unknown courses or plans return `404`; invalid requests return `400`.
+Course routes use a **course code**, while plan routes use a **numeric ID**. Encode spaces in URLs as `%20`: `CS 46B` becomes `CS%2046B`. Unknown courses, plans, or routes return `404`; invalid requests return `400`; unsupported methods return `405`; non-JSON bodies return `415`. Errors use `application/problem+json`.
 
 ### Try it
 
@@ -92,6 +101,12 @@ Look up a course:
 
 ```sh
 curl 'http://localhost:8080/api/courses/CS%20146'
+```
+
+Find the most-referenced prerequisites, excluding classes you have completed (repeat `completed` once per code; commas do not separate codes):
+
+```sh
+curl 'http://localhost:8080/api/courses/prerequisite-frequency?completed=MATH%2019&completed=CS%2046A'
 ```
 
 Check prerequisite readiness:
@@ -110,11 +125,22 @@ curl -i 'http://localhost:8080/api/plans' \
   -d '{"semester":"Fall 2026","maxUnits":15,"courseCodes":["CS 147","CS 151"]}'
 ```
 
-Use the returned plan `id` for later GET and PUT requests. Plans persist across application restarts. See the [full API guide](docs/api.md) for request fields, response examples, compatibility routes, and validation rules.
+Use the returned plan `id` for later GET, PUT, and DELETE requests. Plans persist across application restarts. See the [full API guide](docs/api.md) for request fields, response examples, compatibility routes, and validation rules.
 
 ## Tests
 
-Tests require a reachable PostgreSQL database. Prefer a separate test database and set the three `SPRING_DATASOURCE_*` variables in your test terminal before running:
+### Frontend
+
+Frontend unit tests use Vitest and do not need the backend:
+
+```sh
+cd frontend
+npm test
+```
+
+### Backend
+
+Backend tests require a reachable PostgreSQL database. Prefer a separate test database and set the three `SPRING_DATASOURCE_*` variables in your test terminal before running:
 
 ```sh
 ./mvnw test
@@ -140,6 +166,7 @@ src/main/java/com/startuplin/course_planner/
 src/main/resources/db/   Manual SQL imports and import documentation
 src/test/java/           Automated tests
 docs/                    API guide and prerequisite research
+frontend/src/            React app, helpers, and Vitest tests
 ```
 
 ## Limitations
@@ -149,4 +176,6 @@ docs/                    API guide and prerequisite research
 - Some imported prerequisite information is provisional. Eligibility uses self-reported preparation and is not university enrollment approval.
 - Saved plans are drafts: unit limits are checked, but eligibility and timetable conflicts are not enforced when saving.
 - There is no authentication or plan ownership. All saved plans are shared within this instance; keep it local until access controls are added.
-- The frontend currently supports course browsing and prerequisite details; saved plans and eligibility are available through the API only.
+- Prerequisite frequency counts references, including alternatives. A high count means a course appears in many prerequisite lists, not that all of those courses strictly require it.
+- Completed classes are stored per browser only; there are no accounts.
+- The frontend supports completed-class tracking and the prerequisite ranking; course descriptions and prerequisite notes are available through the API only. Saved plans and eligibility are available through the API only (`createPlan` exists in `frontend/src/api.js` but has no UI yet).

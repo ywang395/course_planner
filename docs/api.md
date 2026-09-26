@@ -25,6 +25,7 @@ Tests use the PostgreSQL connection in `application.properties`. API integration
 | GET | `/api/courses` | Courses sorted by code |
 | GET | `/api/courses?prerequisite=CS%2046B` | Courses mentioning this exact code in their prerequisite arrays |
 | GET | `/api/courses/by-prerequisite?prerequisite=CS%2046B` | Compatibility route; parameter is required |
+| GET | `/api/courses/prerequisite-frequency?completed=CS%2046A` | How many catalog courses reference each prerequisite code; `completed` is optional and repeatable |
 | GET | `/api/courses/{code}` | One course, including prerequisite notes and source metadata |
 | GET | `/api/courses/{code}/prerequisites` | Stored prerequisite code array |
 | GET | `/api/courses/prerequisites/{code}` | Compatibility route for the code array |
@@ -33,10 +34,11 @@ Tests use the PostgreSQL connection in `application.properties`. API integration
 | GET | `/api/plans` | List saved plans by ID |
 | GET | `/api/plans/{id}` | Retrieve one saved plan |
 | PUT | `/api/plans/{id}` | Replace the semester, unit limit, and complete course selection |
+| DELETE | `/api/plans/{id}` | Delete a saved plan; returns 204 with no body |
 
 Course codes are trimmed, repeated whitespace is collapsed, and letters are uppercased. Keep the space between the subject and number: `cs 146` is accepted, but `CS146` is a different code. In URLs, encode a space as `%20`. Sorting is by the stored string, not numeric course number.
 
-Existing courses with no prerequisite codes and searches with no matches return `200` and `[]`. A missing course or plan returns `404`. Missing required parameters, blank codes, invalid JSON, and invalid request fields return `400`, with an `application/problem+json` response. Validation errors include an `errors` list.
+Existing courses with no prerequisite codes and searches with no matches return `200` and `[]`. A missing course or plan returns `404`. Missing required parameters, blank codes, invalid JSON, and invalid request fields return `400`. Unknown routes return `404`, an unsupported HTTP method returns `405` with an `Allow` header, and a request body that is not JSON returns `415`. All errors use an `application/problem+json` response. Validation errors include an `errors` list.
 
 ## Course requests
 
@@ -47,7 +49,44 @@ curl 'http://localhost:8080/api/courses/CS%20160/prerequisites'
 curl --get 'http://localhost:8080/api/courses' --data-urlencode 'prerequisite=CS 46B'
 ```
 
+Each course includes `code`, `name`, `unit`, `description`, `prerequisites`, `prerequisiteNotes`, `prerequisiteSource`, `prerequisiteSourceType`, and `category`. `category` is `"Major"`, `"GE"`, or `"Elective"` when set by the catalog sync import (`sjsu-catalog-2026-27-sync.sql`), otherwise `null`.
+
 The prerequisite filter matches references, including conditional prerequisites and alternatives. It does not establish eligibility. The code-array endpoint includes referenced codes even when those courses have not been imported as full course records.
+
+## Prerequisite frequency
+
+```sh
+curl 'http://localhost:8080/api/courses/prerequisite-frequency'
+curl 'http://localhost:8080/api/courses/prerequisite-frequency?completed=CS%2046A&completed=MATH%2019'
+```
+
+The response has one entry for every distinct code that appears in at least one catalog course's prerequisite array:
+
+```json
+[
+  {
+    "code": "CS 146",
+    "name": "Data Structures and Algorithms",
+    "unit": 3,
+    "inCatalog": true,
+    "completed": false,
+    "count": 4,
+    "remainingCount": 4,
+    "requiredBy": ["CS 149", "CS 157A", "CS 160", "CS 166"]
+  }
+]
+```
+
+- `count` is the number of catalog courses whose prerequisite arrays contain the code. `requiredBy` lists those courses, sorted by code.
+- `remainingCount` counts only the referencing courses that are not in `completed`.
+- `completed` is `true` when the code itself was supplied in `completed`.
+- `name` and `unit` are `null`, and `inCatalog` is `false`, for referenced codes without a course record (for example `MATH 19`).
+
+Entries are sorted by `remainingCount` descending, then `count` descending, then `code` ascending. Codes that no catalog course references are omitted, even if they are in `completed`.
+
+Repeat `completed` once per course. Each value is normalized like other codes and is treated as one code; commas do not separate values. Codes that are not in the catalog are accepted, because students may have completed courses that were not imported. A blank `completed` value returns `400`.
+
+Prerequisite arrays are references, including alternatives, so a count measures how many courses mention a code. It does not mean every one of those courses requires it. Use the eligibility endpoint to evaluate readiness.
 
 ## Eligibility requests
 
@@ -97,7 +136,7 @@ The evaluator implements explicit rules for **CS 47, CS 146, CS 147, CS 149, CS 
 
 The remaining 16 imported courses return `needs_review`; this includes placement/workshop/GE rules and all seven provisional records. CS 157A's conflicting Software Engineering major restriction also returns `needs_review` unless a supported consent route applies. Instructor consent is accepted only for courses whose researched rules allow it; CS 160 still requires an allowed major. Consent and grades are self-reported and not verified against university systems.
 
-The legacy `CoursePlannerService` still contains the original `containsAll` helper. The REST eligibility endpoint uses `EligibilityService` instead; do not use the legacy helper to interpret alternative prerequisites.
+The legacy `CoursePlannerService` and its `containsAll` helper, together with the unused `Student` and `Schedule` models, have been removed. Eligibility is evaluated only by `EligibilityService`.
 
 ## Saved plan requests
 
@@ -116,8 +155,9 @@ curl 'http://localhost:8080/api/plans/1'
 curl -X PUT 'http://localhost:8080/api/plans/1' \
   -H 'Content-Type: application/json' \
   -d '{"semester":"Spring 2027","maxUnits":12,"courseCodes":["CS 147"]}'
+curl -i -X DELETE 'http://localhost:8080/api/plans/1'
 ```
 
-`semester` must be nonblank and at most 100 characters. `maxUnits` must be a positive integer. `courseCodes` must be present and contain at most 100 codes; an empty list creates an empty draft. Unknown courses return 404. Duplicate codes and a total above the unit limit return 400. Rejected updates preserve the existing plan. PUT replaces the entire selection, rather than appending to it.
+`semester` must be nonblank and at most 100 characters. `maxUnits` must be a positive integer. `courseCodes` must be present and contain at most 100 codes; an empty list creates an empty draft. Unknown courses return 404. Duplicate codes and a total above the unit limit return 400. Rejected updates preserve the existing plan. PUT replaces the entire selection, rather than appending to it. DELETE removes the plan and its course selection, but not the courses themselves. It returns `204`, or `404` if the plan does not exist, including when it was already deleted.
 
 Plans are drafts: saving does not assert eligibility or check timetable conflicts. This application currently has no accounts or plan ownership; all plans are shared within this local instance. No course deletion or administrative catalog mutation endpoint is introduced.
