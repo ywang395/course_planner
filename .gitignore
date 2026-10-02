@@ -35,3 +35,12 @@ build/
 ### Frontend ###
 frontend/node_modules/
 frontend/dist/
+
+### macOS ###
+.DS_Store
+
+### Database dumps ###
+*.dump
+
+### Frontend bundle copied in for local single-origin runs ###
+src/main/resources/static/

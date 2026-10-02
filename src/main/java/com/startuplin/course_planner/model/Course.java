@@ -29,6 +29,9 @@ public class Course {
 
     private String prerequisiteSourceType;
 
+    // "Major", "GE", "Elective", or "Other"; set by the catalog sync and alignment imports.
+    private String category;
+
     protected Course() {
         this.prerequisites = new ArrayList<>();
     }
@@ -95,6 +98,14 @@ public class Course {
 
     public String getPrerequisiteSourceType() {
         return prerequisiteSourceType;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public void setPrerequisites(List<String> prerequisites) {

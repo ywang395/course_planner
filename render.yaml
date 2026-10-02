@@ -1,0 +1,37 @@
+databases:
+  - name: courseplanner-db
+    databaseName: courseplanner
+    postgresMajorVersion: "16"
+    plan: free
+
+services:
+  - type: web
+    name: course-planner
+    runtime: docker
+    plan: free
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: courseplanner-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: courseplanner-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: courseplanner-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: courseplanner-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: courseplanner-db
+          property: password
+      - key: SHOW_SQL
+        value: "false"

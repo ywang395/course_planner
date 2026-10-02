@@ -1,0 +1,10 @@
+.git
+.DS_Store
+target
+frontend/node_modules
+frontend/dist
+src/main/resources/static
+graphify-out
+docs
+*.dump
+*.sql

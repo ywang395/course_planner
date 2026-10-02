@@ -1,7 +1,9 @@
 package com.startuplin.course_planner.controller;
 
+import com.startuplin.course_planner.dto.PrerequisiteFrequency;
 import com.startuplin.course_planner.model.Course;
 import com.startuplin.course_planner.service.CourseService;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +26,15 @@ public class CourseController {
     public List<Course> getAllCourses(@RequestParam(required = false) String prerequisite) {
         return prerequisite == null ? courseService.getAllCourses()
                 : courseService.getCoursesByPrerequisite(prerequisite);
+    }
+
+    /**
+     * Repeat {@code completed} for each finished course. Values are read raw (not comma-split) so that each
+     * repeated value is exactly one code and a blank value is rejected with 400.
+     */
+    @GetMapping("/prerequisite-frequency")
+    public List<PrerequisiteFrequency> getPrerequisiteFrequency(@RequestParam MultiValueMap<String, String> query) {
+        return courseService.getPrerequisiteFrequency(query.getOrDefault("completed", List.of()));
     }
 
     @GetMapping("/{code}")

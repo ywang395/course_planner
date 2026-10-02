@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.0</version>
+		<version>4.1.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.startuplin</groupId>
@@ -28,6 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<!-- Spring Boot 4.1.1 manages 11.0.24; 11.0.25 fixes GHSA-9xv2-5v5q-p794, GHSA-gcx9-497g-6cp6, GHSA-h3x4-894j-xpx5. Remove once the parent manages 11.0.25 or later. -->
+		<tomcat.version>11.0.25</tomcat.version>
 	</properties>
 	<dependencies>
 		<dependency>
