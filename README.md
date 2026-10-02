@@ -61,7 +61,7 @@ Open `http://localhost:5173`. Import the course data below if the list is empty.
 
 To understand the frontend, start with `frontend/src/api.js` (HTTP requests), `frontend/src/App.jsx` (page state and loading), `frontend/src/CompletedPanel.jsx`, `frontend/src/PrerequisiteRanking.jsx`, and `frontend/src/CourseCatalog.jsx` (the panels), and the pure helpers in `frontend/src/completed.js`, `frontend/src/prerequisiteFrequency.js`, and `frontend/src/catalog.js`.
 
-Run `npm run build` from `frontend/` to generate `frontend/dist/`. For production, serve these static files with a host that also routes `/api` to Spring Boot; the development proxy is not included in the build.
+Run `npm run build` from `frontend/` to generate `frontend/dist/`. The development proxy is not included in the build. In production, the `Dockerfile` copies `frontend/dist/` into the Spring Boot jar as static resources, so the page and `/api` share one origin and the relative URLs keep working; see [Deploy to Render](#deploy-to-render).
 
 ## Import course data
 
@@ -79,6 +79,33 @@ psql -h localhost -U your_postgres_role -d courseplanner -v ON_ERROR_STOP=1 -f s
 If you changed the database host, port, or name, use the matching connection options in these commands. `psql` may prompt for your password.
 
 The first three imports load 26 roadmap courses with researched prerequisite notes. The next two load the normalized 2026–2027 catalog dataset (program requirements, GE areas, prerequisite rules, and source evidence in separate tables) and sync it into the app's `course` table, bringing it to 85 courses, including CS electives and previously off-catalog prerequisites such as MATH 19 and CMPE 102. The last one aligns every course's category and units with the 2026–2027 Computer Science, BS catalog page and adds CS 180H and CS 190I (87 courses). Courses without a published unit count are stored with 0 units. This is still not a complete university catalog. Imports are manual, not automatic at startup. See the [database import guide](src/main/resources/db/README.md) for details and the [prerequisite report](docs/sjsu-course-prerequisites.md) for sources and caveats.
+
+## Deploy to Render
+
+The app deploys as one Docker web service, with Spring Boot serving both the React build and `/api`, plus a managed PostgreSQL 16 database. Both are defined in `render.yaml`.
+
+1. Run `./mvnw test` and `npm test` (in `frontend/`) locally. The Docker build skips backend tests because they need a live database.
+2. Push to `main` on GitHub.
+3. In the Render dashboard, choose **New → Blueprint**, select this repository, and apply it. Render creates `courseplanner-db` and `course-planner`, passes the database connection to the app as `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD`, and redeploys on every push to `main`.
+4. Load the course data from your machine. Copy the database's **External Database URL** from its Render page, then either restore a local dump:
+
+   ```sh
+   pg_dump -Fc -d courseplanner -f courseplanner.dump
+   pg_restore --no-owner --no-acl --clean --if-exists -d "<EXTERNAL_DATABASE_URL>" courseplanner.dump
+   ```
+
+   or run the six imports from [Import course data](#import-course-data) with `psql "<EXTERNAL_DATABASE_URL>" -v ON_ERROR_STOP=1 -f ...`, after the app has started once and created the tables. A dump also copies your local saved plans; clear them with `psql "<EXTERNAL_DATABASE_URL>" -c "TRUNCATE course_plan_courses, course_plan;"` if you do not want them online. `*.dump` files are git-ignored.
+5. Open `https://<service-name>.onrender.com`. `/actuator/health` should report `UP` and `/api/courses` should return 87 courses.
+
+`application.properties` reads `PORT`, the `DB_*` variables, and `SHOW_SQL` (set to `false` on Render), and falls back to the local defaults above when they are unset. On the free plan the web service sleeps when idle, so the first request afterwards waits for Spring Boot to start, and free databases expire after a limited period; check Render's current plan terms.
+
+To try the production bundle locally without Docker, copy the build into the jar's static resources and open `http://localhost:8080`:
+
+```sh
+(cd frontend && npm run build) && cp -R frontend/dist src/main/resources/static
+./mvnw spring-boot:run
+rm -rf src/main/resources/static   # git-ignored; remove it so port 8080 does not keep serving a stale build
+```
 
 ## API endpoints
 
@@ -170,6 +197,8 @@ src/main/resources/db/   Manual SQL imports and import documentation
 src/test/java/           Automated tests
 docs/                    API guide and prerequisite research
 frontend/src/            React app, helpers, and Vitest tests
+Dockerfile               Production image: React build bundled into the Spring Boot jar
+render.yaml              Render blueprint: web service and PostgreSQL database
 ```
 
 ## Limitations
