@@ -29,7 +29,7 @@ public class Course {
 
     private String prerequisiteSourceType;
 
-    // "Major", "GE", or "Elective"; set by the catalog sync import.
+    // "Major", "GE", "Elective", or "Other"; set by the catalog sync and alignment imports.
     private String category;
 
     protected Course() {

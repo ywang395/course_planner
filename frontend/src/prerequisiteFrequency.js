@@ -55,9 +55,10 @@ export function subjectOf(code) {
 // Fallback for courses without a category from the backend: the seeded roadmap
 // descriptions tag general-education courses with "GE Area ...".
 const GE_PATTERN = /\bGE\b/;
-const CATEGORY_IDS = ['Major', 'GE', 'Elective'];
+const CATEGORY_IDS = ['Major', 'GE', 'Elective', 'Other'];
 
-// "Major", "GE", or "Elective" for a code, from the course's category. Off-catalog
+// "Major", "GE", "Elective", or "Other" (not part of the degree requirements) for
+// a code, from the course's category. Off-catalog
 // variants inherit from the longest catalog code they extend ("ENGL 1AF" ->
 // "ENGL 1A", "MATH 30PL" -> "MATH 30"); anything else unknown is a major class.
 export function classifyCourse(code, courses = []) {
@@ -75,9 +76,10 @@ const CATEGORIES = [
   { id: 'Major', title: 'Major classes', label: 'major' },
   { id: 'GE', title: 'GE classes', label: 'GE' },
   { id: 'Elective', title: 'Elective classes', label: 'elective' },
+  { id: 'Other', title: 'Other classes', label: 'other' },
 ];
 
-// Splits ranked rows into Major, GE, and Elective sections, each holding its subjects in
+// Splits ranked rows into Major, GE, Elective, and Other sections, each holding its subjects in
 // alphabetical order. Rows keep their rank order within a subject; empty
 // subjects are dropped.
 export function groupRanking(rows = [], courses = []) {

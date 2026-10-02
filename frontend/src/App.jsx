@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getCourses } from './api.js';
 import CompletedPanel from './CompletedPanel.jsx';
+import CourseCatalog from './CourseCatalog.jsx';
 import PrerequisiteRanking from './PrerequisiteRanking.jsx';
+import SuggestedOrder from './SuggestedOrder.jsx';
 import {
   addCompleted, collectKnownCodes, impliedCompleted, loadCompleted, removeCompleted, saveCompleted, sortCodes,
   toggleCompleted,
@@ -33,6 +35,10 @@ export default function App() {
   function undoClear() {
     if (lastCleared) setCompleted(lastCleared);
     setLastCleared(null);
+  }
+
+  function toggleCourse(code) {
+    updateCompleted((current) => toggleCompleted(current, code));
   }
 
   const knownCodes = useMemo(() => collectKnownCodes(courses), [courses]);
@@ -95,26 +101,40 @@ export default function App() {
         ) : courses.length === 0 ? (
           <p className="state-panel">No courses have been imported yet. Follow the database import steps in the project README.</p>
         ) : (
-          <div className="planner-grid">
-            <CompletedPanel
-              completed={completed}
-              implied={implied}
-              knownCodes={knownCodes}
-              courseNames={courseNames}
-              storageAvailable={storageAvailable}
-              lastCleared={lastCleared}
-              onAdd={(code) => updateCompleted((current) => addCompleted(current, code))}
-              onRemove={(code) => updateCompleted((current) => removeCompleted(current, code))}
-              onClear={clearCompleted}
-              onUndoClear={undoClear}
-            />
-            <PrerequisiteRanking
+          <>
+            <div className="planner-grid">
+              <CompletedPanel
+                completed={completed}
+                implied={implied}
+                knownCodes={knownCodes}
+                courseNames={courseNames}
+                storageAvailable={storageAvailable}
+                lastCleared={lastCleared}
+                onAdd={(code) => updateCompleted((current) => addCompleted(current, code))}
+                onRemove={(code) => updateCompleted((current) => removeCompleted(current, code))}
+                onClear={clearCompleted}
+                onUndoClear={undoClear}
+              />
+              <PrerequisiteRanking
+                completed={effectiveCompleted}
+                implied={implied}
+                courses={courses}
+                onToggleCompleted={toggleCourse}
+              />
+            </div>
+            <SuggestedOrder
+              courses={courses}
               completed={effectiveCompleted}
               implied={implied}
-              courses={courses}
-              onToggleCompleted={(code) => updateCompleted((current) => toggleCompleted(current, code))}
+              onToggleCompleted={toggleCourse}
             />
-          </div>
+            <CourseCatalog
+              courses={courses}
+              completed={effectiveCompleted}
+              implied={implied}
+              onToggleCompleted={toggleCourse}
+            />
+          </>
         )}
       </main>
       <footer>2026–2027 roadmap sample · Planning aid, not official enrollment approval.</footer>

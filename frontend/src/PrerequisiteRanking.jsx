@@ -121,7 +121,7 @@ export default function PrerequisiteRanking({ completed, implied = [], courses, 
         </label>
       </div>
       <p className="panel-hint">
-        Classes that appear in the most prerequisite lists, split into major, GE, and elective classes. Prerequisites of your completed classes count as completed. Click a subject to see its classes. Lists include alternatives (for example “MATH 19 or MATH 18A”), so a high rank means <em>most referenced</em>, not required.
+        Classes that appear in the most prerequisite lists, split into major, GE, elective, and other (not required) classes. Prerequisites of your completed classes count as completed. Click a subject to see its classes. Lists include alternatives (for example “MATH 19 or MATH 18A”), so a high rank means <em>most referenced</em>, not required.
         The score shows how many courses you haven't completed still list it, out of all courses that list it.
       </p>
       {source === 'browser' && !error && (
