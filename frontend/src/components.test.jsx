@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import CompletedPanel from './CompletedPanel.jsx';
+import CourseCatalog from './CourseCatalog.jsx';
 import { RankingGroups } from './PrerequisiteRanking.jsx';
+import SuggestedOrder from './SuggestedOrder.jsx';
 
 const noop = () => {};
 
@@ -135,5 +137,115 @@ describe('RankingGroups', () => {
     expect(renderToStaticMarkup(<RankingGroups {...base} rows={[]} completed={[]} />)).toContain('No prerequisite references');
     expect(renderToStaticMarkup(<RankingGroups {...base} rows={[row('CS 146')]} completed={['CS 146']} hideCompleted />))
       .toContain('completed every referenced class');
+  });
+});
+
+describe('CourseCatalog', () => {
+  const courses = [
+    { code: 'CS 46A', name: 'Introduction to Programming', unit: 4, category: 'Major' },
+    { code: 'MATH 30', name: 'Calculus I', unit: 3, category: 'GE' },
+    { code: 'CS 146', name: 'Data Structures and Algorithms', unit: 3, category: 'Major' },
+    { code: 'CS 157B', name: 'Database Management Systems II', unit: 3, category: 'Elective' },
+    { code: 'CS 180', name: 'Individual Studies', unit: 0, category: 'Elective' },
+    { code: 'CMPE 102', name: 'Assembly Language Programming', unit: 0, category: 'Other' },
+  ];
+  const base = { courses, completed: [], onToggleCompleted: noop };
+
+  it('renders lower- and upper-division panels with GE, Major, Elective, Other sections in order', () => {
+    const html = renderToStaticMarkup(<CourseCatalog {...base} />);
+    const lower = html.indexOf('Lower-division classes');
+    const upper = html.indexOf('Upper-division classes');
+    expect(lower).toBeGreaterThan(-1);
+    expect(upper).toBeGreaterThan(lower);
+    expect(html).toContain('Lower-division classes <span class="panel-count">(2)</span>');
+    expect(html).toContain('Upper-division classes <span class="panel-count">(4)</span>');
+
+    const lowerPart = html.slice(lower, upper);
+    expect(lowerPart.indexOf('GE classes')).toBeLessThan(lowerPart.indexOf('Major classes'));
+    expect(lowerPart.indexOf('Major classes')).toBeLessThan(lowerPart.indexOf('Elective classes'));
+    expect(lowerPart.indexOf('Elective classes')).toBeLessThan(lowerPart.indexOf('Other classes'));
+    expect(html.slice(upper).indexOf('Other classes')).toBeLessThan(html.slice(upper).indexOf('CMPE 102'));
+    expect(lowerPart).toContain('MATH 30');
+    expect(lowerPart).toContain('No lower-division elective classes in the catalog.');
+    expect(html.slice(upper)).toContain('No upper-division GE classes in the catalog.');
+    expect(html).toContain('<details class="subject-group">');
+    expect(html).not.toContain('open=""');
+  });
+
+  it('states the units each section needs and the degree total', () => {
+    const html = renderToStaticMarkup(<CourseCatalog {...base} />);
+    expect(html).toContain('Units to graduate <span class="panel-count">(120)</span>');
+    expect(html).toContain('<dt>Major requirements (including 17 elective units)</dt><dd>55</dd>');
+    expect(html).toContain('<dt>Total</dt><dd>120</dd>');
+    expect(html.match(/class="requirement-note"/g)).toHaveLength(8);
+    const upper = html.slice(html.indexOf('Upper-division classes'));
+    expect(upper).toContain('<strong>Need 33 units.</strong>');
+    expect(upper).toContain('<strong>Need 17 units, including any lower-division electives.</strong>');
+    expect(html).toContain('<strong>Not required.</strong>');
+  });
+
+  it('shows units, with a note when a course has none published', () => {
+    const html = renderToStaticMarkup(<CourseCatalog {...base} />);
+    expect(html).toContain('4 units');
+    expect(html).toContain('Units not published');
+  });
+
+  it('marks completed and covered courses and locks covered checkboxes', () => {
+    const html = renderToStaticMarkup(
+      <CourseCatalog {...base} completed={['CS 146', 'CS 46A']} implied={[{ code: 'CS 46A', via: 'CS 146' }]} />,
+    );
+    expect(html).toContain('catalog-row is-completed');
+    expect(html).toContain('Covered by CS 146');
+    expect(html).toMatch(/id="catalog-completed-CS-46A"[^>]*disabled=""/);
+    expect(html).not.toMatch(/id="catalog-completed-CS-146"[^>]*disabled/);
+  });
+});
+
+describe('SuggestedOrder', () => {
+  const courses = [
+    { code: 'CS 46A', name: 'Introduction to Programming', unit: 4, category: 'Major', prerequisites: [] },
+    { code: 'CS 46AX', name: 'Introduction to Programming', unit: 4, category: 'Major', prerequisites: [], prerequisiteNotes: 'Placement.' },
+    { code: 'CS 46B', name: 'Introduction to Data Structures', unit: 4, category: 'Major', prerequisites: ['CS 46A', 'CS 46AX'] },
+    { code: 'MATH 42', name: 'Discrete Mathematics', unit: 3, category: 'Major', prerequisites: ['MATH 19'] },
+    { code: 'CS 146', name: 'Data Structures and Algorithms', unit: 3, category: 'Major', prerequisites: ['CS 46B', 'MATH 42'] },
+    { code: 'PHIL 134', name: 'Computers, Ethics and Society', unit: 3, category: 'Major', prerequisites: [] },
+    { code: 'CS 171', name: 'Introduction to Machine Learning', unit: 3, category: 'Elective', prerequisites: [] },
+  ];
+  const base = { courses, completed: [], onToggleCompleted: noop };
+
+  it('renders one column per step, starting with the classes available now', () => {
+    const html = renderToStaticMarkup(<SuggestedOrder {...base} />);
+    expect(html).toContain('Suggested order');
+    expect(html).toContain('0 of 5 required done');
+    expect(html.indexOf('Step 1 · Available now')).toBeLessThan(html.indexOf('Step 2'));
+    expect(html.indexOf('Step 2')).toBeLessThan(html.indexOf('Step 3'));
+    expect(html).toContain('After CS 46B, MATH 42');
+    // Choice groups list each option; single classes show one Completed checkbox.
+    expect(html).toContain('CS 46A or CS 46AX');
+    expect(html).toContain('id="order-completed-CS-46AX"');
+    expect(html).toMatch(/id="order-completed-CS-146"[^>]*\/>Completed</);
+    // Electives are not placed.
+    expect(html).not.toContain('CS 171');
+  });
+
+  it('tags classes without recorded prerequisites and moves unlocked classes forward', () => {
+    const html = renderToStaticMarkup(<SuggestedOrder {...base} completed={['CS 46A', 'CS 46B']} />);
+    expect(html).toContain('2 of 5 required done');
+    expect(html).toContain('Prerequisites not recorded');
+    const now = html.slice(html.indexOf('Available now'), html.indexOf('Step 2'));
+    expect(now).toContain('MATH 42');
+    expect(now).not.toContain('CS 46B');
+  });
+
+  it('locks classes covered through prerequisites and shows a finished state', () => {
+    const covered = renderToStaticMarkup(
+      <SuggestedOrder {...base} courses={[...courses, { code: 'BIOL 30', name: 'Principles of Biology I', unit: 4, category: 'Major', prerequisites: [] }]}
+        completed={['BIOL 30']} implied={[{ code: 'BIOL 30', via: 'BIOL 31' }]} />,
+    );
+    expect(covered).toContain('4 of 8 units');
+    expect(covered).toMatch(/id="order-completed-BIOL-30"[^>]*disabled=""/);
+
+    const done = renderToStaticMarkup(<SuggestedOrder {...base} completed={['CS 46A', 'CS 46B', 'MATH 42', 'CS 146', 'PHIL 134']} />);
+    expect(done).toContain('You&#x27;ve completed every required major class.');
   });
 });

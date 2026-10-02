@@ -155,7 +155,7 @@ describe('groupRanking', () => {
   ];
   it('splits rows into Major then GE, with subjects alphabetical and rank order kept', () => {
     const groups = groupRanking(rows, geCatalog);
-    expect(groups.map((group) => group.title)).toEqual(['Major classes', 'GE classes', 'Elective classes']);
+    expect(groups.map((group) => group.title)).toEqual(['Major classes', 'GE classes', 'Elective classes', 'Other classes']);
     expect(groups[0].subjects.map(({ subject, rows: r }) => [subject, r.map((row) => row.code)])).toEqual([
       ['CMPE', ['CMPE 102']],
       ['CS', ['CS 146', 'CS 46A']],
@@ -166,16 +166,24 @@ describe('groupRanking', () => {
       ['MATH', ['MATH 30']],
     ]);
   });
-  it('keeps all three sections even when empty', () => {
+  it('keeps all four sections even when empty', () => {
     expect(groupRanking([], geCatalog)).toEqual([
       { id: 'Major', title: 'Major classes', label: 'major', subjects: [] },
       { id: 'GE', title: 'GE classes', label: 'GE', subjects: [] },
       { id: 'Elective', title: 'Elective classes', label: 'elective', subjects: [] },
+      { id: 'Other', title: 'Other classes', label: 'other', subjects: [] },
     ]);
   });
   it('puts elective courses in their own section', () => {
     const groups = groupRanking([{ code: 'CS 48' }, { code: 'CS 146' }], [...geCatalog, { code: 'CS 48', category: 'Elective' }]);
     expect(groups[2].subjects).toEqual([{ subject: 'CS', rows: [{ code: 'CS 48' }] }]);
+    expect(groups[0].subjects[0].rows).toEqual([{ code: 'CS 146' }]);
+  });
+  it('puts courses outside the degree requirements in Other, including their variants', () => {
+    const catalog = [...geCatalog, { code: 'CMPE 102', category: 'Other' }, { code: 'MATH 19', category: 'Other' }];
+    const groups = groupRanking([{ code: 'CMPE 102' }, { code: 'MATH 19' }, { code: 'CS 146' }], catalog);
+    expect(groups[3].subjects.map(({ subject }) => subject)).toEqual(['CMPE', 'MATH']);
+    expect(classifyCourse('CMPE 102X', catalog)).toBe('Other');
     expect(groups[0].subjects[0].rows).toEqual([{ code: 'CS 146' }]);
   });
 });

@@ -38,3 +38,6 @@ frontend/dist/
 
 ### macOS ###
 .DS_Store
+
+### Database dumps ###
+*.dump
