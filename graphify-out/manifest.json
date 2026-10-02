@@ -1,21 +1,21 @@
 {
   "frontend/package.json": {
-    "mtime": 1789458376.1857998,
-    "seen": 1789606920.0571961,
-    "ast_hash": "39692bcf5e63232a53f9f1e9dc639ef8",
-    "semantic_hash": "39692bcf5e63232a53f9f1e9dc639ef8"
+    "mtime": 1790318991.407588,
+    "seen": 1790658978.507957,
+    "ast_hash": "3d207e991d9211bf0d96d72b9c8f1bff",
+    "semantic_hash": "3d207e991d9211bf0d96d72b9c8f1bff"
   },
   "frontend/src/App.jsx": {
-    "mtime": 1789458376.4229996,
-    "seen": 1789606920.057198,
-    "ast_hash": "687b984682672a6dfe8c4822f01b8b44",
-    "semantic_hash": "687b984682672a6dfe8c4822f01b8b44"
+    "mtime": 1790324219.566985,
+    "seen": 1790658978.5079591,
+    "ast_hash": "cef1d7e280f916b46ebe8901e6de6b5d",
+    "semantic_hash": "cef1d7e280f916b46ebe8901e6de6b5d"
   },
   "frontend/src/api.js": {
-    "mtime": 1789600978.412595,
-    "seen": 1789606920.057199,
-    "ast_hash": "2302a7b308becbef370285ab14dab926",
-    "semantic_hash": "2302a7b308becbef370285ab14dab926"
+    "mtime": 1790319251.2649367,
+    "seen": 1790658978.5079622,
+    "ast_hash": "af692ccc74a78fe63c376b1a54c22ff1",
+    "semantic_hash": "af692ccc74a78fe63c376b1a54c22ff1"
   },
   "frontend/src/main.jsx": {
     "mtime": 1789458376.343581,
@@ -36,10 +36,10 @@
     "semantic_hash": "ab50dd89da7da2346b28003352eeeeeb"
   },
   "pom.xml": {
-    "mtime": 1787617636.9282742,
-    "seen": 1789606920.057201,
-    "ast_hash": "022a54fa1a7c827449c42b134138bbd3",
-    "semantic_hash": "022a54fa1a7c827449c42b134138bbd3"
+    "mtime": 1790404949.379804,
+    "seen": 1790658978.507968,
+    "ast_hash": "f604c6ab49de160b8150df89c8b54bee",
+    "semantic_hash": "f604c6ab49de160b8150df89c8b54bee"
   },
   "src/main/java/com/startuplin/course_planner/CoursePlannerApplication.java": {
     "mtime": 1787471865.0,
@@ -48,22 +48,22 @@
     "semantic_hash": "bdb6d48302079205c727374d72a563f5"
   },
   "src/main/java/com/startuplin/course_planner/controller/ApiExceptionHandler.java": {
-    "mtime": 1789457087.0182264,
-    "seen": 1789606920.0572019,
-    "ast_hash": "a535bd1671d105198b8100bc4e3149d7",
-    "semantic_hash": "a535bd1671d105198b8100bc4e3149d7"
+    "mtime": 1790319040.0296834,
+    "seen": 1790658978.5079691,
+    "ast_hash": "89a89b189abf0819d801916459e70af8",
+    "semantic_hash": "89a89b189abf0819d801916459e70af8"
   },
   "src/main/java/com/startuplin/course_planner/controller/CourseController.java": {
-    "mtime": 1789456958.9490163,
-    "seen": 1789606920.0572019,
-    "ast_hash": "53d76b17c6a8c1f8910d0b14d32a5534",
-    "semantic_hash": "53d76b17c6a8c1f8910d0b14d32a5534"
+    "mtime": 1790319024.4272249,
+    "seen": 1790658978.5079691,
+    "ast_hash": "368f8f3ca6d54c43de81d265dae39a02",
+    "semantic_hash": "368f8f3ca6d54c43de81d265dae39a02"
   },
   "src/main/java/com/startuplin/course_planner/controller/PlanController.java": {
-    "mtime": 1789456959.3763204,
-    "seen": 1789606920.057203,
-    "ast_hash": "fa482e85f2baa959ae154f483bca97ee",
-    "semantic_hash": "fa482e85f2baa959ae154f483bca97ee"
+    "mtime": 1790319040.0290377,
+    "seen": 1790658978.50797,
+    "ast_hash": "b1bb71654904c70e30bfed77c4711eb1",
+    "semantic_hash": "b1bb71654904c70e30bfed77c4711eb1"
   },
   "src/main/java/com/startuplin/course_planner/controller/PlannerController.java": {
     "mtime": 1789457086.974943,
@@ -96,28 +96,16 @@
     "semantic_hash": "73df5988133daa629b6df30bb74fc870"
   },
   "src/main/java/com/startuplin/course_planner/model/Course.java": {
-    "mtime": 1789433269.1626813,
-    "seen": 1789606920.057205,
-    "ast_hash": "8bcbd53456755c814985264878a86e67",
-    "semantic_hash": "8bcbd53456755c814985264878a86e67"
+    "mtime": 1790324094.081006,
+    "seen": 1790658978.5079732,
+    "ast_hash": "53813c22124b56f55ca1cc99fb857501",
+    "semantic_hash": "53813c22124b56f55ca1cc99fb857501"
   },
   "src/main/java/com/startuplin/course_planner/model/CoursePlan.java": {
     "mtime": 1789456959.2032175,
     "seen": 1789606920.057205,
     "ast_hash": "d26e44cb5afbb2935666b2e5a083890b",
     "semantic_hash": "d26e44cb5afbb2935666b2e5a083890b"
-  },
-  "src/main/java/com/startuplin/course_planner/model/Schedule.java": {
-    "mtime": 1787558218.393134,
-    "seen": 1789606920.057206,
-    "ast_hash": "8cff4f0b69ecf531281a7f7e10f63376",
-    "semantic_hash": "8cff4f0b69ecf531281a7f7e10f63376"
-  },
-  "src/main/java/com/startuplin/course_planner/model/Student.java": {
-    "mtime": 1787558203.4978652,
-    "seen": 1789606920.057206,
-    "ast_hash": "50c2c588133fdf72b48634a58edeab45",
-    "semantic_hash": "50c2c588133fdf72b48634a58edeab45"
   },
   "src/main/java/com/startuplin/course_planner/repository/CourseRepository.java": {
     "mtime": 1789456959.0315223,
@@ -131,17 +119,11 @@
     "ast_hash": "3a4d885551fd7e39b52a67495373d7d9",
     "semantic_hash": "3a4d885551fd7e39b52a67495373d7d9"
   },
-  "src/main/java/com/startuplin/course_planner/service/CoursePlannerService.java": {
-    "mtime": 1787558767.8105552,
-    "seen": 1789606920.057207,
-    "ast_hash": "9a808c690eb71ec1ac1c8cde449180c2",
-    "semantic_hash": "9a808c690eb71ec1ac1c8cde449180c2"
-  },
   "src/main/java/com/startuplin/course_planner/service/CourseService.java": {
-    "mtime": 1789456958.9914782,
-    "seen": 1789606920.057208,
-    "ast_hash": "60b64b5492d8fac1080d893bdd8ae6b9",
-    "semantic_hash": "60b64b5492d8fac1080d893bdd8ae6b9"
+    "mtime": 1790319113.5956256,
+    "seen": 1790658978.5079749,
+    "ast_hash": "10a6f882eb3e5cf1181cb15dfde70bb9",
+    "semantic_hash": "10a6f882eb3e5cf1181cb15dfde70bb9"
   },
   "src/main/java/com/startuplin/course_planner/service/EligibilityService.java": {
     "mtime": 1789457086.9312937,
@@ -150,10 +132,10 @@
     "semantic_hash": "b9a073b509451f1aaab14ab7d96c17ed"
   },
   "src/main/java/com/startuplin/course_planner/service/PlanService.java": {
-    "mtime": 1789456959.2843542,
-    "seen": 1789606920.057208,
-    "ast_hash": "4235f8391e811a2c204718f531acb899",
-    "semantic_hash": "4235f8391e811a2c204718f531acb899"
+    "mtime": 1790319040.02926,
+    "seen": 1790658978.507976,
+    "ast_hash": "59eaa228aef708b8c3a9908f286e418b",
+    "semantic_hash": "59eaa228aef708b8c3a9908f286e418b"
   },
   "src/main/resources/db/sjsu-course-prerequisite-codes.sql": {
     "mtime": 1789433523.1283488,
@@ -180,22 +162,22 @@
     "semantic_hash": "db12fdb81b205e2eb4312f7ff3c9f737"
   },
   "src/test/java/com/startuplin/course_planner/RestApiTests.java": {
-    "mtime": 1789457370.0205023,
-    "seen": 1789606920.0572102,
-    "ast_hash": "d0356e0ad1ad1b087ded4652a52e737f",
-    "semantic_hash": "d0356e0ad1ad1b087ded4652a52e737f"
+    "mtime": 1790324102.455687,
+    "seen": 1790658978.507979,
+    "ast_hash": "1a3515aabf389494ddb5671b1df221ed",
+    "semantic_hash": "1a3515aabf389494ddb5671b1df221ed"
   },
   "README.md": {
-    "mtime": 1789458376.537543,
-    "seen": 1789606920.0572102,
-    "ast_hash": "1616311fd62f3e5bea403c2c1b809c34",
-    "semantic_hash": "1616311fd62f3e5bea403c2c1b809c34"
+    "mtime": 1790324297.4922647,
+    "seen": 1790658978.50798,
+    "ast_hash": "df853f96a9077e13804034d5302c4185",
+    "semantic_hash": "df853f96a9077e13804034d5302c4185"
   },
   "docs/api.md": {
-    "mtime": 1789457328.8973024,
-    "seen": 1789606920.057211,
-    "ast_hash": "e00b4e159a524a8eba383b7ef2c014c5",
-    "semantic_hash": "e00b4e159a524a8eba383b7ef2c014c5"
+    "mtime": 1790324297.4916444,
+    "seen": 1790658978.50798,
+    "ast_hash": "479784dd186bd02736ce7122986144e2",
+    "semantic_hash": "479784dd186bd02736ce7122986144e2"
   },
   "docs/sjsu-course-prerequisites.md": {
     "mtime": 1789433523.1760106,
@@ -210,9 +192,69 @@
     "semantic_hash": "0736b1fd86bb8847cb2118fb992390c5"
   },
   "src/main/resources/db/README.md": {
-    "mtime": 1789433523.242511,
-    "seen": 1789606920.0572119,
-    "ast_hash": "131694bc66d856e784e8c9d9b6ace5cb",
-    "semantic_hash": "131694bc66d856e784e8c9d9b6ace5cb"
+    "mtime": 1790324297.4918923,
+    "seen": 1790658978.50798,
+    "ast_hash": "ce7dfd787155fe803189b608db08f7ea",
+    "semantic_hash": "ce7dfd787155fe803189b608db08f7ea"
+  },
+  "frontend/src/CompletedPanel.jsx": {
+    "mtime": 1790324219.5674484,
+    "seen": 1790658978.50796,
+    "ast_hash": "c5c2de2cfde26036d118e9ab97c1db20",
+    "semantic_hash": "c5c2de2cfde26036d118e9ab97c1db20"
+  },
+  "frontend/src/PrerequisiteRanking.jsx": {
+    "mtime": 1790324219.5677073,
+    "seen": 1790658978.507961,
+    "ast_hash": "6fd3bb43f1164b26e3285d497dee37e1",
+    "semantic_hash": "6fd3bb43f1164b26e3285d497dee37e1"
+  },
+  "frontend/src/api.test.js": {
+    "mtime": 1790319251.265346,
+    "seen": 1790658978.5079622,
+    "ast_hash": "dbd85706a71227221c35b533b1c4772d",
+    "semantic_hash": "dbd85706a71227221c35b533b1c4772d"
+  },
+  "frontend/src/completed.js": {
+    "mtime": 1790324167.179442,
+    "seen": 1790658978.507963,
+    "ast_hash": "6c008f317bb71143fa7ecf2679ac1f08",
+    "semantic_hash": "6c008f317bb71143fa7ecf2679ac1f08"
+  },
+  "frontend/src/completed.test.js": {
+    "mtime": 1790324195.9047277,
+    "seen": 1790658978.507963,
+    "ast_hash": "c9a75ab91a4580f293d08fd26ca3064f",
+    "semantic_hash": "c9a75ab91a4580f293d08fd26ca3064f"
+  },
+  "frontend/src/components.test.jsx": {
+    "mtime": 1790324232.081802,
+    "seen": 1790658978.507964,
+    "ast_hash": "f72c2fa7a64cfd5385d9cdbc0fcb8e7a",
+    "semantic_hash": "f72c2fa7a64cfd5385d9cdbc0fcb8e7a"
+  },
+  "frontend/src/prerequisiteFrequency.js": {
+    "mtime": 1790324167.179715,
+    "seen": 1790658978.5079648,
+    "ast_hash": "4684e0d3bcc6a3e62e01021f6bba9ae6",
+    "semantic_hash": "4684e0d3bcc6a3e62e01021f6bba9ae6"
+  },
+  "frontend/src/prerequisiteFrequency.test.js": {
+    "mtime": 1790324187.4827347,
+    "seen": 1790658978.507966,
+    "ast_hash": "d65bbcfb8a246473ff71095524ebe1cc",
+    "semantic_hash": "d65bbcfb8a246473ff71095524ebe1cc"
+  },
+  "src/main/java/com/startuplin/course_planner/dto/PrerequisiteFrequency.java": {
+    "mtime": 1790319008.0730803,
+    "seen": 1790658978.5079732,
+    "ast_hash": "7bc347d316c6e3ec58498ce4a11b6919",
+    "semantic_hash": "7bc347d316c6e3ec58498ce4a11b6919"
+  },
+  "src/main/resources/db/sjsu-catalog-2026-27-sync.sql": {
+    "mtime": 1790324121.9136384,
+    "seen": 1790658978.507976,
+    "ast_hash": "4140ff9ea0f5cc90b0591a85870ccd4a",
+    "semantic_hash": "4140ff9ea0f5cc90b0591a85870ccd4a"
   }
 }
